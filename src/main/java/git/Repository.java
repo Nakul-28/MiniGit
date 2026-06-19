@@ -58,6 +58,14 @@ public class Repository {
         Files.writeString(refPath, sha + "\n");
     }
 
+    public String readHeadRefPath() throws IOException {
+    String content = Files.readString(gitDir.resolve("HEAD")).strip();
+    if (content.startsWith("ref: ")) {
+        return content.substring(5);
+    }
+    throw new IllegalStateException("HEAD is detached, not pointing to a branch");
+}
+
     public Path getRoot()   { return root; }
     public Path getGitDir() { return gitDir; }
     public boolean exists() { return Files.exists(gitDir); }
