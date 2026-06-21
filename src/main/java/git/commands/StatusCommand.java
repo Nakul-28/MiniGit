@@ -16,6 +16,7 @@ public class StatusCommand implements Main.Command {
     @Override
     public void execute(Repository repo, String[] args) throws Exception {
         Index index = Index.load(repo.getGitDir());
+        Path root = repo.getRoot();
 
         // get the tree from HEAD's commit, if any
         Map<String, String> headFiles = new HashMap<>(); // path -> blob sha
@@ -29,8 +30,9 @@ public class StatusCommand implements Main.Command {
         }
 
         Set<String> staged = new TreeSet<>();      // staged for commit (index differs from HEAD)
-        Set<String> modified = new TreeSet<>();     // working dir differs from index
-        Set<String> untracked = new TreeSet<>();    // in working dir, not in index
+        Set<String> modified = new TreeSet<>();    // working dir differs from index
+        Set<String> untracked = new TreeSet<>();   // in working dir, not in index
+        Set<String> deleted = new TreeSet<>();     // tracked in index, missing from disk
 
         // compare index vs HEAD -> staged changes
         for (var entry : index.getEntries().entrySet()) {
@@ -42,8 +44,15 @@ public class StatusCommand implements Main.Command {
             }
         }
 
+        // check for tracked files that no longer exist on disk
+        for (var entry : index.getEntries().entrySet()) {
+            Path filePath = root.resolve(entry.getKey());
+            if (!Files.exists(filePath)) {
+                deleted.add(entry.getKey());
+            }
+        }
+
         // compare working directory vs index -> modified / untracked
-        Path root = repo.getRoot();
         for (Path file : listTrackableFiles(root)) {
             String relPath = root.relativize(file).toString().replace("\\", "/");
             byte[] content = Files.readAllBytes(file);
@@ -57,7 +66,7 @@ public class StatusCommand implements Main.Command {
             }
         }
 
-        if (staged.isEmpty() && modified.isEmpty() && untracked.isEmpty()) {
+        if (staged.isEmpty() && modified.isEmpty() && untracked.isEmpty() && deleted.isEmpty()) {
             System.out.println("Nothing to commit, working tree clean.");
             return;
         }
@@ -70,6 +79,11 @@ public class StatusCommand implements Main.Command {
         if (!modified.isEmpty()) {
             System.out.println("Changes not staged for commit:");
             for (String p : modified) System.out.println("    modified: " + p);
+            System.out.println();
+        }
+        if (!deleted.isEmpty()) {
+            System.out.println("Deleted files:");
+            for (String p : deleted) System.out.println("    deleted: " + p);
             System.out.println();
         }
         if (!untracked.isEmpty()) {

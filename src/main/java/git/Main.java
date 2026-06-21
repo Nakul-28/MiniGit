@@ -9,6 +9,7 @@ import git.commands.LogCommand;
 import git.commands.StatusCommand;
 import git.commands.BranchCommand;
 import git.commands.CheckoutCommand;
+import git.commands.DiffCommand;
 
 public class Main {
     public interface Command {
@@ -29,6 +30,7 @@ public class Main {
         commands.put("status", new StatusCommand());
         commands.put("branch", new BranchCommand());
         commands.put("checkout", new CheckoutCommand());
+        commands.put("diff", new DiffCommand());
 
         String cmd = args[0];
         if (!commands.containsKey(cmd)) {
