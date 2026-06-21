@@ -1,14 +1,17 @@
 package git;
 
+import git.objects.Commit;
 import git.objects.GitObject;
 import git.objects.Tree;
+import git.objects.Commit;
 import git.objects.Tree;
 import git.util.HashUtil;
 import git.util.ZlibUtil;
 
-
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Repository {
     private final Path root;
@@ -98,5 +101,32 @@ public class Repository {
             Files.createDirectories(filePath.getParent());
             Files.write(filePath, content);
         }
+    }
+
+    public String findMergeBase(String sha1, String sha2) throws Exception {
+        Set<String> ancestors1 = collectAncestors(sha1);
+        Set<String> ancestors2 = collectAncestors(sha2);
+
+        // walk sha1's own ancestry in order, return first one also in sha2's set
+        String current = sha1;
+        while (current != null) {
+            if (ancestors2.contains(current)) {
+                return current;
+            }
+            Commit c = Commit.deserialize(readObject(current));
+            current = c.getParentSha();
+        }
+        return null; // no common ancestor (shouldn't happen in a normal repo)
+    }
+
+    private Set<String> collectAncestors(String sha) throws Exception {
+        Set<String> ancestors = new HashSet<>();
+        String current = sha;
+        while (current != null) {
+            ancestors.add(current);
+            Commit c = Commit.deserialize(readObject(current));
+            current = c.getParentSha();
+        }
+        return ancestors;
     }
 }

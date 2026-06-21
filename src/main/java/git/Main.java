@@ -10,6 +10,7 @@ import git.commands.StatusCommand;
 import git.commands.BranchCommand;
 import git.commands.CheckoutCommand;
 import git.commands.DiffCommand;
+import git.commands.MergeCommand;
 
 public class Main {
     public interface Command {
@@ -31,6 +32,7 @@ public class Main {
         commands.put("branch", new BranchCommand());
         commands.put("checkout", new CheckoutCommand());
         commands.put("diff", new DiffCommand());
+        commands.put("merge", new MergeCommand());
 
         String cmd = args[0];
         if (!commands.containsKey(cmd)) {
