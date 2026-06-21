@@ -1,8 +1,11 @@
 package git;
 
 import git.objects.GitObject;
+import git.objects.Tree;
+import git.objects.Tree;
 import git.util.HashUtil;
 import git.util.ZlibUtil;
+
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -30,8 +33,8 @@ public class Repository {
         String sha = HashUtil.sha256Hex(data);
         byte[] compressed = ZlibUtil.compress(data);
         Path objPath = gitDir.resolve("objects")
-                             .resolve(sha.substring(0, 2))
-                             .resolve(sha.substring(2));
+                .resolve(sha.substring(0, 2))
+                .resolve(sha.substring(2));
         Files.createDirectories(objPath.getParent());
         Files.write(objPath, compressed);
         obj.setSha(sha);
@@ -39,16 +42,18 @@ public class Repository {
 
     public byte[] readObject(String sha) throws Exception {
         Path objPath = gitDir.resolve("objects")
-                             .resolve(sha.substring(0, 2))
-                             .resolve(sha.substring(2));
+                .resolve(sha.substring(0, 2))
+                .resolve(sha.substring(2));
         return ZlibUtil.decompress(Files.readAllBytes(objPath));
     }
 
     public String resolveRef(String ref) throws IOException {
         Path refPath = gitDir.resolve(ref);
-        if (!Files.exists(refPath)) return null;
+        if (!Files.exists(refPath))
+            return null;
         String content = Files.readString(refPath).strip();
-        if (content.startsWith("ref: ")) return resolveRef(content.substring(5));
+        if (content.startsWith("ref: "))
+            return resolveRef(content.substring(5));
         return content;
     }
 
@@ -59,14 +64,39 @@ public class Repository {
     }
 
     public String readHeadRefPath() throws IOException {
-    String content = Files.readString(gitDir.resolve("HEAD")).strip();
-    if (content.startsWith("ref: ")) {
-        return content.substring(5);
+        String content = Files.readString(gitDir.resolve("HEAD")).strip();
+        if (content.startsWith("ref: ")) {
+            return content.substring(5);
+        }
+        throw new IllegalStateException("HEAD is detached, not pointing to a branch");
     }
-    throw new IllegalStateException("HEAD is detached, not pointing to a branch");
-}
 
-    public Path getRoot()   { return root; }
-    public Path getGitDir() { return gitDir; }
-    public boolean exists() { return Files.exists(gitDir); }
+    public Path getRoot() {
+        return root;
+    }
+
+    public Path getGitDir() {
+        return gitDir;
+    }
+
+    public boolean exists() {
+        return Files.exists(gitDir);
+
+    }
+
+    public void checkoutTree(Tree tree, Path targetDir) throws Exception {
+        for (Tree.Entry entry : tree.getEntries()) {
+            byte[] blobData = readObject(entry.sha);
+            // strip the "blob <size>\0" header to get raw content
+            int nullIndex = 0;
+            while (blobData[nullIndex] != 0)
+                nullIndex++;
+            byte[] content = new byte[blobData.length - nullIndex - 1];
+            System.arraycopy(blobData, nullIndex + 1, content, 0, content.length);
+
+            Path filePath = targetDir.resolve(entry.name);
+            Files.createDirectories(filePath.getParent());
+            Files.write(filePath, content);
+        }
+    }
 }

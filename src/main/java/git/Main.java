@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import git.commands.AddCommand;
 import git.commands.CommitCommand;
+import git.commands.LogCommand;
+import git.commands.StatusCommand;
+import git.commands.BranchCommand;
+import git.commands.CheckoutCommand;
 
 public class Main {
     public interface Command {
@@ -21,6 +25,10 @@ public class Main {
         commands.put("init", (repo, a) -> Repository.init(Paths.get(".").toAbsolutePath().normalize()));
         commands.put("add", new AddCommand());
         commands.put("commit", new CommitCommand());
+        commands.put("log", new LogCommand());
+        commands.put("status", new StatusCommand());
+        commands.put("branch", new BranchCommand());
+        commands.put("checkout", new CheckoutCommand());
 
         String cmd = args[0];
         if (!commands.containsKey(cmd)) {
