@@ -1,6 +1,6 @@
 # MiniGit
 A Git-inspired version control system in Java implementing content-addressable storage, commits, branches, and checkout from scratch.
-
+[![asciicast](https://asciinema.org/a/CaLbSq8bRFl0oyDs.svg)](https://asciinema.org/a/CaLbSq8bRFl0oyDs)
 ## Why I built this
 
 To genuinely understand how Git works under the hood rather than just using it
