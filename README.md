@@ -5,6 +5,7 @@ A Git-inspired version control system in Java implementing content-addressable s
 <p align="center">
   <img src="demo.gif" alt="MiniGit Demo" width="1200">
 </p>
+
 ## Why I built this
 
 To genuinely understand how Git works under the hood rather than just using it
