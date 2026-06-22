@@ -2,7 +2,9 @@
 A Git-inspired version control system in Java implementing content-addressable storage, commits, branches, and checkout from scratch.
 ## Demo
 
-![MiniGit Demo](demo.gif)
+<p align="center">
+  <img src="demo.gif" alt="MiniGit Demo" width="1200">
+</p>
 ## Why I built this
 
 To genuinely understand how Git works under the hood rather than just using it
