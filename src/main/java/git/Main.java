@@ -11,6 +11,8 @@ import git.commands.BranchCommand;
 import git.commands.CheckoutCommand;
 import git.commands.DiffCommand;
 import git.commands.MergeCommand;
+import git.commands.TagCommand;
+import git.commands.StashCommand;
 
 public class Main {
     public interface Command {
@@ -33,6 +35,8 @@ public class Main {
         commands.put("checkout", new CheckoutCommand());
         commands.put("diff", new DiffCommand());
         commands.put("merge", new MergeCommand());
+        commands.put("tag", new TagCommand());
+        commands.put("stash", new StashCommand());
 
         String cmd = args[0];
         if (!commands.containsKey(cmd)) {

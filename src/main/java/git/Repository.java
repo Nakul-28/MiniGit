@@ -1,5 +1,6 @@
 package git;
 
+import git.index.Index;
 import git.objects.Commit;
 import git.objects.GitObject;
 import git.objects.Tree;
@@ -88,9 +89,25 @@ public class Repository {
     }
 
     public void checkoutTree(Tree tree, Path targetDir) throws Exception {
+        // collect the set of files the new tree wants
+        Set<String> desiredFiles = new HashSet<>();
+        for (Tree.Entry entry : tree.getEntries()) {
+            desiredFiles.add(entry.name);
+        }
+
+        // delete any tracked file currently in the working directory
+        // that isn't part of the new tree
+        Index currentIndex = Index.load(gitDir);
+        for (String trackedPath : currentIndex.getEntries().keySet()) {
+            if (!desiredFiles.contains(trackedPath)) {
+                Path staleFile = targetDir.resolve(trackedPath);
+                Files.deleteIfExists(staleFile);
+            }
+        }
+
+        // write the new tree's files
         for (Tree.Entry entry : tree.getEntries()) {
             byte[] blobData = readObject(entry.sha);
-            // strip the "blob <size>\0" header to get raw content
             int nullIndex = 0;
             while (blobData[nullIndex] != 0)
                 nullIndex++;
