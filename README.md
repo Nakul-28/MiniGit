@@ -104,9 +104,32 @@ java -jar target/minigit.jar commit "first commit"
 ## Testing
 
 ```bash
-mvn test
+mvn clean test
 ```
 
-12 tests covering the object store round-trips, staging, commit chains,
-merge base detection, fast-forward merges, clean three-way merges, and
-conflict marker generation.
+39 tests covering the object store, staging, branching, checkout safety
+checks, diff, three-way merge with conflict detection, tagging, and stashing.
+
+**Test coverage: 87% instruction coverage, 84% branch coverage** (measured
+with JaCoCo). Coverage is lowest in `Main` (CLI argument dispatch) and
+`Benchmark` (a standalone performance harness, not application logic).
+`Main` simply maps a command string to a `Command` object — the actual
+logic behind every command is tested separately and sits at 94% coverage
+in `git.commands`. This separation (thin entry point, tested business
+logic) is intentional, and is why `Repository` and `git.commands` — where
+the real behavior lives — are both at 90%+.
+
+## Test coverage breakdown
+
+| Package | Instruction coverage | Branch coverage |
+|---|---|---|
+| `git.objects` (Blob, Tree, Commit) | 97% | 96% |
+| `git.index` | 96% | 75% |
+| `git.commands` | 94% | 86% |
+| `git.util` (HashUtil, ZlibUtil) | 84% | 100% |
+| `git` (Repository, Main, Benchmark) | 55% | 66% |
+| **Total** | **87%** | **84%** |
+
+`Main` and `Benchmark` account for most of the gap in the `git` package —
+`Main` is thin CLI dispatch (logic tested separately in `git.commands`),
+and `Benchmark` is a manual performance tool, not application logic.
