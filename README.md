@@ -101,6 +101,42 @@ java -jar target/minigit.jar add myfile.txt
 java -jar target/minigit.jar commit "first commit"
 ```
 
+## Setting up the `mgit` shortcut
+
+Running the full jar path every time is tedious, so you can create a simple
+CLI wrapper that mimics how real `git` is invoked.
+
+**1. Create a batch file** named `mgit.bat`:
+
+```bat
+@echo off
+java -jar C:\path\to\minigit\target\minigit.jar %*
+```
+
+`%*` forwards all arguments to the jar, so `mgit commit "message"` becomes
+`java -jar ... commit "message"` under the hood.
+
+**2. Add it to your PATH** so it works from any directory:
+
+- Create a folder, e.g. `C:\tools\`, and place `mgit.bat` inside it
+- Add `C:\tools` to your PATH via Environment Variables → User variables → `Path`
+- Open a new terminal (PATH changes don't apply to already-open ones)
+
+**3. Use it like real Git:**
+
+```bash
+mgit init
+mgit add file.txt
+mgit commit "message"
+mgit branch feature
+mgit checkout feature
+mgit merge feature
+mgit log
+```
+
+The jar only needs to be rebuilt with `mvn clean package`; `mgit.bat` keeps
+pointing to the same path, so no further setup is needed after rebuilds.
+
 ## Testing
 
 ```bash
